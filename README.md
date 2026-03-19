@@ -1,10 +1,10 @@
-# Log Utility & Settings Manager
+# log utility & settings manager
 
 A interactive Python command-line tool designed for managing configuration files and matching pre-defined regular expresions in log files
 
 ---
 
-## Features
+## features
 
 * **Interactive Configuration Editor**: Load, view, and modify `settings.ini` files directly from the terminal.
 * **Automatic Backups**: Automatically creates a `.bak` file whenever you save changes to your settings.
@@ -15,14 +15,14 @@ A interactive Python command-line tool designed for managing configuration files
 
 ---
 
-## Requirements
+## requirements
 
 * **Python 3.10+**: This script utilizes the `match/case` structural pattern matching introduced in Python 3.10.
 * **Standard Libraries**: No external dependencies (uses `configparser`, `re`, and `os`).
 
 ---
 
-## Usage
+## usage
 
 1.  **Run the script**:
     ```bash
@@ -39,7 +39,7 @@ A interactive Python command-line tool designed for managing configuration files
 
 ---
 
-## File Structure
+## file structure
 
 | File | Description |
 | :--- | :--- |
@@ -49,7 +49,7 @@ A interactive Python command-line tool designed for managing configuration files
 
 ---
 
-## mportant Notes
+## important Notes
 
 * **Keyboard Interrupt**: You can exit the program at any time using `Ctrl+C`. This will exit without saving any pending changes.
 * **File Permissions**: Ensure the script has read/write permissions for the directory it is running in to generate logs and backups.
