@@ -7,7 +7,6 @@ SETTINGS_INI = "settings.ini"
 BACKUP_SETTINGS_INI = f"{SETTINGS_INI}.bak"
 LOG_RESULTS_TXT = "log_results.txt"
 
-
 class SettingsManager:
     def __init__(self, file_path, backup_path):
         self.file_path = file_path
@@ -33,11 +32,10 @@ class SettingsManager:
         print(f"saving to {self.file_path}...")
         with open(self.file_path, "w") as f:
             self.config.write(f)
-
+        
         print(f"saving original backup to {self.backup_path}...")
         with open(self.backup_path, "w") as f:
             self.original_config.write(f)
-
 
 class LogSearcher:
     def __init__(self, output_path):
@@ -51,81 +49,92 @@ class LogSearcher:
                 for line in file:
                     if self.pattern.search(line):
                         matches.append(line)
-
+            
             print(f"writing matches to {self.output_path}")
             with open(self.output_path, "w") as file:
                 file.writelines(matches)
         except FileNotFoundError:
             print("File not found. Please check the path.")
 
+def select_section(config):
+    while True:
+        try:
+            print("----- sections available (Ctrl+C to go back) -----")
+            for s in config.sections(): print(f"[{s}]")
+            sec = input("enter section to edit: ").strip()
+            if sec in config: return sec
+            print(f"section '{sec}' not found\n")
+        except KeyboardInterrupt:
+            print("\nReturning to menu...")
+            return None
 
-def main():
-    try:
-        while True:
-            prompt = "1=edit settings.ini\n2=search log file\nSelection: "
-            user_input = input(prompt).strip()
-            if user_input == "1":
-                settings_flow()
-                break
-            elif user_input == "2":
-                log_flow()
-                break
-            else:
-                print("Invalid selection. Please enter 1 or 2.\n")
-    except KeyboardInterrupt:
-        print("\nexiting without saving\ngoodbye!")
-        os._exit(1)
-
+def select_key(config, section):
+    while True:
+        try:
+            print(f"----- keys in [{section}] (Ctrl+C to go back) -----")
+            for k in config[section]: print(f"{k}={config.get(section, k)}")
+            key = input("enter key to edit: ").strip()
+            if key in config[section]: return key
+            print(f"key '{key}' not found\n")
+        except KeyboardInterrupt:
+            print("\nReturning to menu...")
+            return None
 
 def settings_flow():
     manager = SettingsManager(SETTINGS_INI, BACKUP_SETTINGS_INI)
     manager.display()
-
+    
     while True:
         try:
-            choice = int(input("1=edit\n2=save and exit\nenter choice: "))
+            choice = input("1=edit\n2=save and exit\nenter choice: ").strip()
             print()
-            if choice == 1:
+            if choice == "1":
                 section = select_section(manager.config)
+                if section is None: continue
+                
                 key = select_key(manager.config, section)
-                print(f"{key}={manager.config.get(section, key)}")
-                new_val = input("enter new value: ")
-                manager.update_value(section, key, new_val)
-                manager.display()
-            elif choice == 2:
+                if key is None: continue
+                
+                print(f"Current: {key}={manager.config.get(section, key)}")
+                try:
+                    new_val = input("enter new value (Ctrl+C to cancel): ")
+                    manager.update_value(section, key, new_val)
+                    print("\nUpdated view:")
+                    manager.display()
+                except KeyboardInterrupt:
+                    print("\nEdit cancelled.")
+            
+            elif choice == "2":
                 manager.save()
-                os._exit(0)
-        except ValueError:
-            print("could not parse selection as integer")
-
+                break
+            else:
+                print("Invalid choice.")
+        except KeyboardInterrupt:
+            print("\nexiting settings editor...")
+            break
 
 def log_flow():
-    path = input("enter file path to the log to search: ")
-    searcher = LogSearcher(LOG_RESULTS_TXT)
-    searcher.search_and_export(path)
+    try:
+        path = input("enter file path to the log to search (Ctrl+C to go back): ")
+        searcher = LogSearcher(LOG_RESULTS_TXT)
+        searcher.search_and_export(path)
+    except KeyboardInterrupt:
+        print("\nReturning to menu...")
 
-
-def select_section(config):
+def main():
     while True:
-        print("----- sections available -----")
-        for s in config.sections():
-            print(f"[{s}]")
-        sec = input("enter section to edit: ")
-        if sec in config:
-            return sec
-        print("section not found\n")
-
-
-def select_key(config, section):
-    while True:
-        print("----- keys available -----")
-        for k in config[section]:
-            print(f"{k}={config.get(section, k)}")
-        key = input("enter key to edit: ")
-        if key in config[section]:
-            return key
-        print("key not found\n")
-
+        try:
+            prompt = "1=edit settings.ini\n2=search log file\nSelection (Ctrl+C to exit): "
+            user_input = input(prompt).strip()
+            if user_input == "1":
+                settings_flow()
+            elif user_input == "2":
+                log_flow()
+            else:
+                print("Invalid selection.\n")
+        except KeyboardInterrupt:
+            print("\ngoodbye!")
+            os._exit(0)
 
 if __name__ == "__main__":
     main()

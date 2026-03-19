@@ -1,9 +1,0 @@
-[settings]
-hostname = test-hostname
-ip_address = 8.8.8.8
-subnet_mask = 255.255.255.0
-
-[etc]
-name = John Doe
-location = usa
-
